@@ -1,28 +1,29 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+﻿using Dto.RequestDto;
+using Mapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using WebApi.Dto.RequestDto;
-using WebApi.Mapper;
-using WebApi.Repositories;
+using Microsoft.Extensions.Logging;
+using Services.Contracts;
 
-namespace WebApi.Controllers
+namespace Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class BookController : ControllerBase
     {
-        private readonly RepositoryContext _context;
+        private readonly IServiceManager _serviceManager;
         private readonly ILogger<BookController> _logger;
 
-        public BookController(RepositoryContext context, ILogger<BookController> logger)
+        public BookController(IServiceManager serviceManager, ILogger<BookController> logger)
         {
-            _context = context;
+            _serviceManager = serviceManager;
             _logger = logger;
         }
 
         [HttpGet]
         public IActionResult GetAllBooks()
         {
-            var books = _context.Books.ToList();
+            var books = _serviceManager.Book.GetAllBooks(false);
             return Ok(books);
         }
 
@@ -32,7 +33,7 @@ namespace WebApi.Controllers
             try
             {
                 _logger.LogInformation($"Attempting to retrieve book with ID: {id}");
-                var book = _context.Books.FirstOrDefault(b => b.Id == id);
+                var book = _serviceManager.Book.GetOneBookById(id, false);
 
                 if (book is null)
                 {
@@ -60,9 +61,10 @@ namespace WebApi.Controllers
                     _logger.LogWarning("Invalid input data. Returning 400 Bad Request.");
                     return BadRequest();
                 }
+
                 var newBook = BookMapper.toEntity(bookRequestDto);
-                _context.Books.Add(newBook);
-                _context.SaveChanges();
+                _serviceManager.Book.CreateBook(newBook);
+
                 _logger.LogInformation($"Book created successfully with ID: {newBook.Id}");
 
                 // HTTP 201 Created yanıtını oluştur ve Location başlığını ekleyerek URI'yi belirle
@@ -86,20 +88,10 @@ namespace WebApi.Controllers
                     return BadRequest();
                 }
 
-                var book = _context.Books.FirstOrDefault(b => b.Id == id);
-
-                if (book is null)
-                {
-                    _logger.LogWarning($"Book with ID {id} not found. Returning 404 NotFound.");
-                    return NotFound();
-                }
-
-                book.Title = bookRequestDto.Title;
-                book.Price = bookRequestDto.Price;
-                _context.SaveChanges();
+                _serviceManager.Book.UpdateBook(id, BookMapper.toEntity(bookRequestDto), true);
 
                 _logger.LogInformation($"Book with ID {id} updated successfully.");
-                return Ok(book);
+                return NoContent();
             }
             catch (Exception ex)
             {
@@ -113,16 +105,7 @@ namespace WebApi.Controllers
         {
             try
             {
-                var book = _context.Books.FirstOrDefault(b => b.Id == id);
-
-                if (book is null)
-                {
-                    _logger.LogWarning($"Book with ID {id} not found. Returning 404 NotFound.");
-                    return NotFound();
-                }
-
-                _context.Books.Remove(book);
-                _context.SaveChanges();
+                _serviceManager.Book.DeleteBook(id, false);
 
                 _logger.LogInformation($"Book with ID {id} deleted successfully.");
                 return Ok();
@@ -145,7 +128,7 @@ namespace WebApi.Controllers
                     return BadRequest();
                 }
 
-                var book = _context.Books.FirstOrDefault(b => b.Id == id);
+                var book = _serviceManager.Book.GetOneBookById(id, true);
 
                 if (book is null)
                 {
@@ -162,12 +145,10 @@ namespace WebApi.Controllers
                     return BadRequest(ModelState);
                 }
 
-                book.Title = bookRequestDto.Title;
-                book.Price = bookRequestDto.Price;
-                _context.SaveChanges();
+                _serviceManager.Book.UpdateBook(id, BookMapper.toEntity(bookRequestDto), true);
 
                 _logger.LogInformation($"Book with ID {id} updated successfully.");
-                return Ok(book);
+                return NoContent();
             }
             catch (Exception ex)
             {

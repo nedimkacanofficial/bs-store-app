@@ -1,7 +1,7 @@
-﻿using WebApi.Dto.RequestDto;
-using WebApi.Models;
+﻿using Dto.RequestDto;
+using Entities;
 
-namespace WebApi.Mapper
+namespace Mapper
 {
     public static class BookMapper
     {
