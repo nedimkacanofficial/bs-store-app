@@ -1,0 +1,8 @@
+2023-12-18 00:16:27.6708 Info Registered target NLog.Targets.FileTarget(Name=logfile)
+2023-12-18 00:16:27.6905 Info NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.2.7.2287. Product version: 5.2.7+a1ef7cd83b5a6a172142a6850f0ced4e759a4b3b. GlobalAssemblyCache: False
+2023-12-18 00:16:27.6905 Info Validating config: TargetNames=logfile, ConfigItems=12, FilePath=C:\Users\msi\source\repos\BsStoreApp\WebApi\nlog.config
+2023-12-18 00:16:27.6905 Info Configuration initialized.
+2023-12-18 00:16:49.5502 Info Registered target NLog.Targets.FileTarget(Name=logfile)
+2023-12-18 00:16:49.5502 Info NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.2.7.2287. Product version: 5.2.7+a1ef7cd83b5a6a172142a6850f0ced4e759a4b3b. GlobalAssemblyCache: False
+2023-12-18 00:16:49.5677 Info Validating config: TargetNames=logfile, ConfigItems=12, FilePath=C:\Users\msi\source\repos\BsStoreApp\WebApi\nlog.config
+2023-12-18 00:16:49.5677 Info Configuration initialized.

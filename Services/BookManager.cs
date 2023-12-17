@@ -7,16 +7,19 @@ namespace Services
     public class BookManager : IBookService
     {
         private readonly IRepositoryManager _manager;
+        private readonly ILoggerService _logger;
 
-        public BookManager(IRepositoryManager manager)
+        public BookManager(IRepositoryManager manager, ILoggerService logger)
         {
             _manager = manager;
+            _logger = logger;
         }
 
         public Book CreateBook(Book book)
         {
             if (book is null)
             {
+                _logger.LogInfo("Book object sent from client is null.");
                 throw new ArgumentNullException(nameof(book));
             }
             _manager.Book.CreateOneBook(book);
@@ -30,6 +33,7 @@ namespace Services
             var book = _manager.Book.GetOneBookById(id, trackChanges);
             if (book is null)
             {
+                _logger.LogInfo($"Book with id: {id} doesn't exist in the database.");
                 throw new ArgumentNullException(nameof(book));
             }
             _manager.Book.DeleteOneBook(book);
@@ -50,12 +54,14 @@ namespace Services
         {
             if (book is null)
             {
+                _logger.LogInfo("Book object sent from client is null.");
                 throw new ArgumentNullException(nameof(book));
             }
             // Check if book exists
             var bookEntity = _manager.Book.GetOneBookById(id, trackChanges);
             if (bookEntity is null)
             {
+                _logger.LogInfo($"Book with id: {id} doesn't exist in the database.");
                 throw new ArgumentNullException(nameof(bookEntity));
             }
 
