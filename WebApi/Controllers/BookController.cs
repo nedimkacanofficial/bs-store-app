@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using WebApi.Dto.RequestDto;
 using WebApi.Mapper;
 using WebApi.Repositories;
@@ -129,6 +130,48 @@ namespace WebApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"An error occurred while deleting book with ID {id}: {ex.Message}");
+                throw new Exception(ex.Message);
+            }
+        }
+
+        [HttpPatch("{id}")]
+        public IActionResult PatchBook([FromRoute(Name = "id")] int id, [FromBody] JsonPatchDocument<BookRequestDto> patchDoc)
+        {
+            try
+            {
+                if (patchDoc is null)
+                {
+                    _logger.LogWarning("Invalid input data. Returning 400 Bad Request.");
+                    return BadRequest();
+                }
+
+                var book = _context.Books.FirstOrDefault(b => b.Id == id);
+
+                if (book is null)
+                {
+                    _logger.LogWarning($"Book with ID {id} not found. Returning 404 NotFound.");
+                    return NotFound();
+                }
+
+                var bookRequestDto = BookMapper.toDto(book);
+                patchDoc.ApplyTo(bookRequestDto, ModelState);
+
+                if (!TryValidateModel(bookRequestDto))
+                {
+                    _logger.LogWarning("Invalid input data. Returning 400 Bad Request.");
+                    return BadRequest(ModelState);
+                }
+
+                book.Title = bookRequestDto.Title;
+                book.Price = bookRequestDto.Price;
+                _context.SaveChanges();
+
+                _logger.LogInformation($"Book with ID {id} updated successfully.");
+                return Ok(book);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"An error occurred while updating book with ID {id}: {ex.Message}");
                 throw new Exception(ex.Message);
             }
         }
